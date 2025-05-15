@@ -4,7 +4,7 @@
 
 * [x] API rate limits, RPM ,cost
 * [ ] Fall back API/method
-* [ ] Database (size/type of data to be stored/maintenance)-books,photos,user data
+* [x] Database (size/type of data to be stored/maintenance)-books,photos,user data
 * [ ] Request queueing mechanism
 * [ ] Azure VM vs Azure services cost and effort (load balancing/scaling/maintaining redis/database)
 * [ ] CPU/GPU/RAM requirements for 1000 user site
@@ -108,3 +108,24 @@ Reference:
     * No pricing information has been specified anywhere
 
 ### Fallback API or Method
+
+### Database
+
+* We can use non relational database to store unstructured data related to the user as to their identification.
+* We can either store the images in binary format in no-sql which is not recommended or use a hybrid approach.
+* The hybrid approach being use no-sql to store most of the information related to user and stuff like images and books can be stored in (e.g) azure blob and the link to the azure blob is stored in the no-sql db for easy access.
+* [MongoDB](https://www.mongodb.com/docs/atlas/cluster-autoscaling/)
+* [CosmosDB](https://learn.microsoft.com/en-us/azure/cosmos-db/introduction)
+
+#### Mongodb, Azure Cosmosdb (No-SQL)
+
+* We already have access to mongodb atlas that can be deployed to azure, or use azure based cosmosdb as well.
+* Mongodb can also be deployed by us if we need full control.
+* Mongodb requires manual configuration for efficient scaling.
+* Cosmosdb has many options for api including mongodb and others. 
+* Cosmosdb is fully automatic scaling
+* Data stored is going to be images, books, user specific data
+
+#### Azure Blob
+
+* images, books and other large data
