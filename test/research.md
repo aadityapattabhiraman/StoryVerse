@@ -8,7 +8,7 @@
 * [ ] Request queueing mechanism
 * [ ] Azure VM vs Azure services cost and effort (load balancing/scaling/maintaining redis/database)
 * [ ] CPU/GPU/RAM requirements for 1000 user site
-* [ ] Payment handling
+* [x] Payment handling
 
 ### API Rate Limits, Cost
 
@@ -129,3 +129,35 @@ Reference:
 #### Azure Blob
 
 * images, books and other large data
+
+### Payment 
+
+#### Payment Gateways
+
+* paypal
+* godaddy
+* stripe
+* square
+* razorpay
+
+### Azure VM v/s Services
+
+* [Azure Services](https://learn.microsoft.com/en-us/azure/architecture/guide/technology-choices/load-balancing-overview)
+* [VMSS](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview)
+
+#### VM 
+
+* Number of VM instances can automatically increased or decreased based on demand using VMSS
+* Charged based on servers allocated.
+
+#### Azure Managed Services
+
+* Deploy apps [Azure Web App](https://azure.microsoft.com/en-us/products/app-service/web)
+* Web app is for frontend or backend. It can scale out and in as per the demand.
+* It can only run 1 language at a time.
+* Cost is based on usage.
+* Functions App [Azure Functions App](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview)
+* Functions app is more for backend where if event is triggered it will perform a function.
+* It is serverless and priced based on usage.
+* It can run only 1 language at a time.
+
