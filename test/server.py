@@ -8,15 +8,16 @@ import asyncio
 
 
 app = FastAPI()
-
 queue = asyncio.Queue()
 MAX_REQUESTS_PER_MINUTE = 5
 responses = {}
+timestamps = []
+
 
 @app.on_event("startup")
 async def startup_event():
 
-    asyncio.create_task(queue_worker())
+    asyncio.gather(queue_worker())
 
 
 async def queue_worker():
@@ -25,31 +26,25 @@ async def queue_worker():
 
         request_id, input_time = await queue.get()
 
-        if queue.empty():
-            continue
-
-
         await queue_images(request_id, input_time)
 
 
 async def queue_images(request_id, input_time):
 
-    timestamps = []
+    global timestamps
 
     for _ in range(15):
 
-        print(_)
         if len(timestamps) < 5:
 
-            start_time = datetime.now().isoformat()
-            print(start_time)
+            start_time = datetime.now()
             timestamps.append(start_time)
 
         else:
 
             while True:
 
-                if datetime.now().isoformat() > timestamps[0] + timedelta(minutes=1):
+                if datetime.now() > timestamps[0] + timedelta(minutes=1):
                     del timestamps[0]
                     break
 
@@ -66,13 +61,15 @@ async def handle_request():
 @app.post("/echo-time")
 async def echo_time(request: Request):
 
+    num_images = 15
     data = await request.json()
     input_time = data.get("time")
 
+    wait_time = (num_images / MAX_REQUESTS_PER_MINUTE) * 1
     request_id = str(datetime.now().timestamp()) + "-" + str(id(input_time))
     await queue.put((request_id, input_time))
 
-    return JSONResponse(content={"message": "Request queued", "id": request_id})
+    return JSONResponse(content={"message": "Request queued", "id": request_id, "expected_time": wait_time})
 
 
 @app.get("/get-response/{request_id}")

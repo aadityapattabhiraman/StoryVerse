@@ -20,7 +20,11 @@ async def send_and_wait(session, i):
 
         data = await resp.json()
         request_id = data["id"]
+        wait_time = data["expected_time"]
+        print(wait_time)
         print(f"[{i+1}] Queued with ID: {request_id}")
+
+    await asyncio.sleep(wait_time)
 
     while True:
 
