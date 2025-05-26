@@ -7,9 +7,30 @@ from openai import OpenAI
 def pipeline():
 
     client = OpenAI(api_key=os.environ["OpenAI_Key"])
+
     prompt = """
-Using the images provided create a hyper-realistic digital painting in traditional oil painting style. Recreate the exact composition, scene, lighting, and expressions of the original template image: a young girl and her grandmother sitting side by side at a wooden table indoors. In front of them are five small bowls filled with bright Holi powders. The room is softly lit with golden sunlight streaming through a window, featuring warm curtains, a bookshelf in the background, and a rainbow drawing on the wall. The girl’s face, hairstyle, and skin tone should be replaced with those from the provided photo of the young girl (braided hair with beads, smiling). Do not change her expression, posture, clothing, or body position—retain those exactly as in the template. The grandmother’s face, hairstyle, and skin tone should be swapped with those from the elderly woman in the second photo (white tied-back hair, red bindi, warm smile). Again, do not alter her expression, clothing, posture, or body orientation from the original template. Preserve the warm, painterly brush texture, the emotional ambiance, and the realistic lighting of the original oil painting.
+Create a hyper-realistic digital painting in the style of a traditional
+oil painting. Recreate the exact composition, lighting, scene, and 
+emotional atmosphere of the original reference image. Preserve every
+element of the setting — including interior details, props, colors, and
+light direction (e.g., golden sunlight, background furniture, windows,
+wall art).
+
+Maintain the original expressions, clothing, posture, body orientation,
+and most importantly, the direction and focus of each person's eye 
+contact. Ensure all emotional cues and visual relationships between the
+subjects remain intact.
+
+Replace only the faces, hairstyles, and skin tones of the figures using
+the provided portrait references. Integrate these new features 
+seamlessly, while keeping all other aspects — especially gesture, 
+expression, clothing, and positioning — completely unchanged.
+Apply a warm, painterly brush texture and realistic lighting that 
+reflect traditional oil painting techniques. Ensure a natural, 
+emotionally coherent fusion of the swapped features into the scene, 
+preserving both realism and artistic depth.
     """
+
     result = client.images.edit(
         model="gpt-image-1",
         image=[
