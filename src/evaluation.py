@@ -1,7 +1,6 @@
 import os
 import time
 import base64
-from datetime import datetime
 from openai import OpenAI
 
 
@@ -38,7 +37,8 @@ preserving both realism and artistic depth.
         model="gpt-image-1",
         image=[
             open("../data/evaluation/template.png", "rb"),
-            open("../data/evaluation/user_face.jpg", "rb"),
+            open("../data/evaluation/user_1.jpg", "rb"),
+            open("../data/evaluation/user_2.jpg", "rb")
         ],
         prompt=prompt
     )
@@ -49,11 +49,10 @@ preserving both realism and artistic depth.
     end = time.time()
     print(f"Time Taken: {end - start}")
 
-    with open("../data/evaluation/face.png", "wb") as f:
+    with open("../data/evaluation/multi_images.png", "wb") as f:
         f.write(image_bytes)
 
-    print("../data/evaluation/face.png", "COMPLETED")
-
+    print("../data/evaluation/multi_images.png", "COMPLETED")
 
 
 if __name__ == "__main__":
