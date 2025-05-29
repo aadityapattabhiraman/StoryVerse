@@ -25,8 +25,8 @@ def pipeline():
     client = OpenAI(api_key=os.environ["OpenAI_Key"])
 
     prompt = """
-Create a hyper-realistic digital painting in the style of a traditional
-oil painting in medium quality. Recreate the exact composition, lighting, scene, and
+Create a high quality hyper-realistic digital painting in the style of a traditional
+oil painting. Recreate the exact composition, lighting, scene, and
 emotional atmosphere of the original reference image. Preserve every
 element of the setting — including interior details, props, colors, and
 light direction (e.g., golden sunlight, background furniture, windows,
@@ -80,16 +80,17 @@ preserving both realism and artistic depth.
             image_base64 = result.data[0].b64_json
             image_bytes = base64.b64decode(image_base64)
 
+            end = time.time()
+            print(f"Time Taken: {end - start}")
+
             # Save the image to a file
             if not os.path.exists(f"../data/results/{mom[epoch][:-4]}"):
                 os.makedirs(f"../data/results/{mom[epoch][:-4]}/")
-            with open(f"../data/results/{mom[epoch][:-4]}/{_}", "wb") as f:
+            with open(f"../data/results/{mom[epoch][:-4]}/{_[:-4]}_dark_{end-start}.png", "wb") as f:
                 f.write(image_bytes)
 
-            print(f"../data/results/{mom[epoch][:-4]}/{_}", "COMPLETED")
+            print(f"../data/results/{mom[epoch][:-4]}/{_[:-4]}_dark_{end-start}.png", "COMPLETED")
 
-            end = time.time()
-            print(f"Time Taken: {end - start}")
 
 
 if __name__ == "__main__":
