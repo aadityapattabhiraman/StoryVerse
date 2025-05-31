@@ -11,7 +11,7 @@ def get_images(data):
     images = []
     for image in os.listdir(data):
 
-        if (image.endswith(".png")) or (image.endswith(".jpg")):
+        if (image.endswith(".png")) or (image.endswith(".jpg")) or (image.endswith(".avif")):
             images.append(image)
 
     return images
@@ -19,39 +19,28 @@ def get_images(data):
 
 def pipeline():
 
-    images = get_images("../data/Maya and the Little Flower/")[:6]
-    mom = get_images("../data/pipeline/mom/")
-    daughter = get_images("../data/pipeline/daughter/")
+    images = get_images("../data/Maya and the Little Flower/")[0]
+    kids = get_images("../data/evaluation/kids/")
     client = OpenAI(api_key=os.environ["OpenAI_Key"])
 
-    prompt = """
-Create a high quality hyper-realistic digital painting in the style of a traditional
-oil painting. Recreate the exact composition, lighting, scene, and
-emotional atmosphere of the original reference image. Preserve every
-element of the setting — including interior details, props, colors, and
-light direction (e.g., golden sunlight, background furniture, windows,
-wall art).
+    situation = "Maya ran outside with a small plastic cover in her hand. As she reached the flower, she slipped in the mud and fell to her knees. She scrambled up, soaked and muddy, determined to protect Lila."
 
-Maintain the original expressions, clothing, posture, body orientation,
-and most importantly, the direction and focus of each person's eye
-contact. Ensure all emotional cues and visual relationships between the
-subjects remain intact.
-
-Replace only the faces, hairstyles, and skin tones of the figures using
-the provided portrait references. Integrate these new features
-seamlessly, while keeping all other aspects — especially gesture,
-expression, clothing, and positioning — completely unchanged.
-Apply a warm, painterly brush texture and realistic lighting that
-reflect traditional oil painting techniques. Ensure a natural,
-emotionally coherent fusion of the swapped features into the scene,
-preserving both realism and artistic depth.
+    prompt = f"""
+Create a high-quality hyper-realistic digital painting in the style of a traditional oil painting. Reproduce the original composition, lighting, scene, and emotional atmosphere exactly as in the reference image, including all interior details, props, colors, and light direction.
+ 
+Preserve every aspect of the setting and figures — including expressions, clothing, posture, body orientation, and eye contact direction. Replace only the faces, hairstyles, and skin tones of the figures using the provided portrait references, while ensuring that the facial features match those in the template image exactly.
+ 
+Integrate the new features seamlessly, maintaining realistic lighting, emotional coherence, and a painterly brush texture consistent with traditional oil painting techniques. Ensure the fusion of the swapped features feels natural and artistically authentic.
+Make sure the image that you generate is of equal dimensions.
+This is the context:
+    {situation}
     """
 
     timestamps = []
 
-    for epoch in range(len(mom)):
+    for epoch in range(1):
 
-        for _ in images:
+        for _ in kids:
 
             start = time.time()
 
@@ -70,9 +59,8 @@ preserving both realism and artistic depth.
             result = client.images.edit(
                 model="gpt-image-1",
                 image=[
-                    open(f"../data/Maya and the Little Flower/{_}", "rb"),
-                    open(f"../data/pipeline/mom/{mom[epoch]}", "rb"),
-                    open(f"../data/pipeline/daughter/{daughter[epoch]}", "rb"),
+                    open(f"../data/Maya and the Little Flower/{images}", "rb"),
+                    open(f"../data/evaluation/kids/{_}", "rb"),
                 ],
                 prompt=prompt
             )
@@ -83,13 +71,10 @@ preserving both realism and artistic depth.
             end = time.time()
             print(f"Time Taken: {end - start}")
 
-            # Save the image to a file
-            if not os.path.exists(f"../data/results/{mom[epoch][:-4]}"):
-                os.makedirs(f"../data/results/{mom[epoch][:-4]}/")
-            with open(f"../data/results/{mom[epoch][:-4]}/{_[:-4]}_dark_{end-start}.png", "wb") as f:
+            with open(f"../data/evaluation/result/{_[:-4]}_{end-start}_3prompt.png", "wb") as f:
                 f.write(image_bytes)
 
-            print(f"../data/results/{mom[epoch][:-4]}/{_[:-4]}_dark_{end-start}.png", "COMPLETED")
+            print(f"../data/evaluation/result/{_[:-4]}_{end-start}_3prompt.png", "COMPLETED")
 
 
 
