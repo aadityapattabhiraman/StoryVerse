@@ -29,9 +29,17 @@ def get_prompt(path: str) -> str:
 def get_situation(path: str) -> List:
 
     with open(path) as f:
-        data = json.load(f)
+        situations = json.load(f)
 
-    return data
+    return situations
+
+
+def get_descritions(path: str) -> List:
+
+    with open(path) as f:
+        descriptions = json.load(f)
+
+    return descriptions
 
 
 def pipeline():
@@ -41,6 +49,8 @@ def pipeline():
     print(template_images)
     situations = get_situation(f"{story}story.json")
     print(situations)
+    descriptions = get_descritions(f"{story}descriptions.json")
+    print(descriptions)
 
 
 if __name__ == "__main__":
