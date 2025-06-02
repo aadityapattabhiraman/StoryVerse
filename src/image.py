@@ -2,7 +2,7 @@ import os
 import time
 import base64
 import json
-from typing import List
+from typing import List, Dict
 from datetime import datetime, timedelta
 from openai import OpenAI
 
@@ -18,28 +18,53 @@ def get_images(directory: str) -> List[str]:
     return images
 
 
-def get_prompt(path: str) -> str:
+def get_prompt(temp: str) -> str:
 
-    print(path)
-    prompt = """"""
+    prompt = f"""
+    Create a hyper-realistic digital painting.
+
+    🎨 Scene & Emotion:
+    The image should depict the following situation:
+    {temp}
+    Use the provided template image to guide the exact layout —
+    including scene composition, pose, gestures, background elements,
+    clothing, lighting, and overall emotional tone.
+
+    👤 Character Identity Replacement:
+    Replace the face, hairstyle, and skin tone of the [child] with the
+    provided reference image(s). Also match the visible body type or
+    build (e.g., chubby, slim) to ensure the character’s full appearance
+    is consistent with the reference.
+    ✦ Preserve exactly:
+    – Facial expression, eye direction, and head tilt
+    – Body posture and gesture
+    – Clothing and props
+    – Scene lighting and painterly texture
+    ✦ Do not change:
+    – Composition, positioning, or atmosphere of the template image
+    – The original emotion or visual storytelling
+
+    The final result should blend the new identity naturally into the
+    original scene with seamless realism and emotional consistency.
+    """
 
     return prompt
 
 
-def get_situation(path: str) -> List:
+def get_situation(path: str) -> Dict:
 
     with open(path) as f:
         situations = json.load(f)
 
-    return situations
+    return situations[0]
 
 
-def get_descritions(path: str) -> List:
+def get_descritions(path: str) -> Dict:
 
     with open(path) as f:
         descriptions = json.load(f)
 
-    return descriptions
+    return descriptions[0]
 
 
 def pipeline():
@@ -56,46 +81,63 @@ def pipeline():
 
     timestamps = []
 
-    for image in template_images:
+    for i in range(2):
 
-        for _ in user_images:
+        if i == 0:
+            situation = True
 
-            start = time.time()
+        else:
+            situation = False
 
-            if len(timestamps) < 5:
-                timestamps.append(datetime.now())
+        for image in template_images:
 
-            else:
+            for _ in user_images:
 
-                while True:
+                start = time.time()
 
-                    if (timestamps[0] + timedelta(minutes=1)) < datetime.now():
+                if len(timestamps) < 5:
+                    timestamps.append(datetime.now())
 
-                        del timestamps[0]
-                        timestamps.append(datetime.now())
-                        break
+                else:
 
-                    time.sleep(1)
+                    while True:
 
-            result = client.images.edit(
-                model="gpt-image-1",
-                image=[
-                    open(f"{story}{image}", "rb"),
-                    open(f"{story}{_}", "rb"),
-                ],
-                prompt=None,
-            )
+                        if ((timestamps[0] + timedelta(minutes=1)) <
+                                datetime.now()):
 
-            image_base64 = result.data[0].b64_json
-            image_bytes = base64.b64decode(image_base64)
+                            del timestamps[0]
+                            timestamps.append(datetime.now())
+                            break
 
-            end = time.time()
-            print(f"Time Taken: {end - start}")
+                        time.sleep(1)
 
-            with open(f"{final}{_:-4}_{end - start}.png", "wb") as f:
-                f.write(image_bytes)
+                if situation:
+                    temp = situations.get(image[:-4])
+                    prompt = get_prompt(temp)
 
-            print(f"{final}{_:-4}_{end - start}.png COMPLETED")
+                else:
+                    temp = descriptions.get(image[:-4])
+                    prompt = get_prompt(temp)
+
+                result = client.images.edit(
+                    model="gpt-image-1",
+                    image=[
+                        open(f"{story}{image}", "rb"),
+                        open(f"../data/evaluation/kids/{_}", "rb"),
+                    ],
+                    prompt=None,
+                )
+
+                image_base64 = result.data[0].b64_json
+                image_bytes = base64.b64decode(image_base64)
+
+                end = time.time()
+                print(f"Time Taken: {end - start}")
+
+                with open(f"{final}{_:-4}_{end - start}.png", "wb") as f:
+                    f.write(image_bytes)
+
+                print(f"{final}{_:-4}_{end - start}.png COMPLETED")
 
 
 if __name__ == "__main__":
