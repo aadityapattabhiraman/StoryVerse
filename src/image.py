@@ -134,10 +134,10 @@ def pipeline():
                 end = time.time()
                 print(f"Time Taken: {end - start}")
 
-                with open(f"{final}{_:-4}_{end - start}.png", "wb") as f:
+                with open(f"{final}{_[:-4]}_{end - start}.png", "wb") as f:
                     f.write(image_bytes)
 
-                print(f"{final}{_:-4}_{end - start}.png COMPLETED")
+                print(f"{final}{_[:-4]}_{end - start}.png COMPLETED")
 
 
 if __name__ == "__main__":
