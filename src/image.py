@@ -4,7 +4,7 @@ import base64
 import json
 from typing import List, Dict
 from datetime import datetime, timedelta
-from openai import OpenAI
+from openai import OpenAI, BadRequestError
 
 
 def get_images(directory: str) -> List[str]:
@@ -71,12 +71,9 @@ def pipeline():
 
     story = "../data/Maya and the Little Flower/"
     final = "../data/04-06/"
-    template_images = get_images(story)
-    print(template_images)
+    template_images = get_images(story)[:2]
     situations = get_situation(f"{story}story.json")
-    print(situations)
     descriptions = get_descritions(f"{story}descriptions.json")
-    print(descriptions)
     user_images = get_images("../data/evaluation/kids/")
 
     timestamps = []
@@ -119,14 +116,21 @@ def pipeline():
                     temp = descriptions.get(image[:-4])
                     prompt = get_prompt(temp)
 
-                result = client.images.edit(
-                    model="gpt-image-1",
-                    image=[
-                        open(f"{story}{image}", "rb"),
-                        open(f"../data/evaluation/kids/{_}", "rb"),
-                    ],
-                    prompt=prompt,
-                )
+                while True:
+                    try:
+
+                        result = client.images.edit(
+                            model="gpt-image-1",
+                            image=[
+                                open(f"{story}{image}", "rb"),
+                                open(f"../data/evaluation/kids/{_}", "rb"),
+                            ],
+                            prompt=prompt,
+                        )
+                        break
+
+                    except BadRequestError:
+                        continue
 
                 image_base64 = result.data[0].b64_json
                 image_bytes = base64.b64decode(image_base64)
