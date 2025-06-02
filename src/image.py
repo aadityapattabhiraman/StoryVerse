@@ -125,7 +125,7 @@ def pipeline():
                         open(f"{story}{image}", "rb"),
                         open(f"../data/evaluation/kids/{_}", "rb"),
                     ],
-                    prompt=None,
+                    prompt=prompt,
                 )
 
                 image_base64 = result.data[0].b64_json
