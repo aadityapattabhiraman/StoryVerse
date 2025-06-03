@@ -31,7 +31,7 @@ def get_prompt(temp: str) -> str:
     clothing, lighting, and overall emotional tone.
 
     👤 Character Identity Replacement:
-    Replace the face, hairstyle, and skin tone of the [child] with the
+    Replace the face, hairstyle, and skin tone of the [both child and adult] with the
     provided reference image(s). Also match the visible body type or
     build (e.g., chubby, slim) to ensure the character’s full appearance
     is consistent with the reference.
@@ -70,11 +70,12 @@ def get_descritions(path: str) -> Dict:
 def pipeline():
 
     story = "../data/Maya and the Little Flower/"
-    final = "../data/04-06/"
+    final = "../data/04-06/multi/"
     template_images = get_images(story)[:2]
     situations = get_situation(f"{story}story.json")
     descriptions = get_descritions(f"{story}descriptions.json")
     user_images = get_images("../data/evaluation/kids/")
+    user_images_1 = get_images("../data/evaluation/adult/")
 
     timestamps = []
 
@@ -86,6 +87,7 @@ def pipeline():
         else:
             situation = False
 
+        j = 0
         for image in template_images:
 
             for _ in user_images:
@@ -124,6 +126,8 @@ def pipeline():
                             image=[
                                 open(f"{story}{image}", "rb"),
                                 open(f"../data/evaluation/kids/{_}", "rb"),
+                                open(f"../data/evaluation/adult/{user_images_1[j]}",
+                                     "rb")
                             ],
                             prompt=prompt,
                         )
@@ -148,6 +152,7 @@ def pipeline():
                         f.write(image_bytes)
 
                 print(f"{final}{_[:-4]}_{end - start}.png COMPLETED")
+                j += 1
 
 
 if __name__ == "__main__":
