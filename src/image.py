@@ -71,7 +71,7 @@ def pipeline():
 
     story = "../data/Maya and the Little Flower/"
     final = "../data/04-06/multi/"
-    template_images = get_images(story)[:2]
+    template_images = get_images(story)[4:6]
     situations = get_situation(f"{story}story.json")
     descriptions = get_descritions(f"{story}descriptions.json")
     user_images = get_images("../data/evaluation/kids/")
@@ -152,7 +152,12 @@ def pipeline():
                         f.write(image_bytes)
 
                 print(f"{final}{_[:-4]}_{end - start}.png COMPLETED")
-                j += 1
+
+                if j < 6:
+                    j += 1
+
+                else:
+                    j = 0
 
 
 if __name__ == "__main__":
