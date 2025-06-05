@@ -19,34 +19,35 @@ def get_images(directory: str) -> List[str]:
     return images
 
 
-def get_prompt(temp: str) -> str:
+def get_prompt(temp: str, kid: str, adult: str) -> str:
 
     prompt = f"""
-    Create a hyper-realistic digital painting.
-
     🎨 Scene & Emotion:
-    The image should depict the following situation:
+    Create a hyper-realistic digital painting based on the following scene description:
     {temp}
-    Use the provided template image to guide the exact layout —
-    including scene composition, pose, gestures, background elements,
-    clothing, lighting, and overall emotional tone.
+    Use the provided template image to guide the exact layout — including scene composition, pose, gestures, background elements, clothing, lighting, and overall emotional tone.
 
-    👤 Character Identity Replacement:
-    Replace the face, hairstyle, and skin tone of the [both child and adult] with the
-    provided reference image(s). Also match the visible body type or
-    build (e.g., chubby, slim) to ensure the character’s full appearance
-    is consistent with the reference.
+    👤 Character Identity Replacement (Descriptive Input):
+    Replace the face, hairstyle, skin tone, and visible body type of both the child and the adult in the template image using the descriptions provided below. Ensure that the new characters are blended seamlessly into the original environment.
+
+    🔹 Child Character Description:
+    {kid}
+
+    🔹 Adult Character Description:
+    {adult}
+
     ✦ Preserve exactly:
     – Facial expression, eye direction, and head tilt
     – Body posture and gesture
     – Clothing and props
     – Scene lighting and painterly texture
+
     ✦ Do not change:
     – Composition, positioning, or atmosphere of the template image
     – The original emotion or visual storytelling
 
-    The final result should blend the new identity naturally into the
-    original scene with seamless realism and emotional consistency.
+    🎨 Final Output:
+    Blend the described characters into the scene with seamless realism and emotional consistency, matching the tone, detail, and storytelling of the original image. The result should appear as though the characters naturally belong in the environment.
     """
 
     return prompt
@@ -65,21 +66,19 @@ def get_descritions(path: str) -> Dict:
     with open(path) as f:
         descriptions = json.load(f)
 
-    return descriptions[0]
+    return descriptions
 
 
 def pipeline():
 
     story = "../data/Maya and the Little Flower/"
-    final = "../data/04-06/multi/"
+    final = "../data/06-06/multi/"
     template_images = get_images(story)[4:6]
     situations = get_situation(f"{story}story.json")
-    descriptions = get_descritions(f"{story}descriptions.json")
+    descriptions = get_descritions(f"{story}descriptions.json")[0]
     user_images = get_images("../data/evaluation/kids/")
-    print(user_images)
     user_images_1 = get_images("../data/evaluation/adult/")
-    print(user_images_1)
-    exit()
+    kid, adult = get_descritions("../data/evaluation/desc.json")
 
     timestamps = []
 
@@ -116,11 +115,11 @@ def pipeline():
 
                 if situation:
                     temp = situations.get(image[:-4])
-                    prompt = get_prompt(temp)
+                    prompt = get_prompt(temp, kid[f"{j + 1}"], adult[f"{j + 1}"])
 
                 else:
                     temp = descriptions.get(image[:-4])
-                    prompt = get_prompt(temp)
+                    prompt = get_prompt(temp, kid[f"{j + 1}"], adult[f"{j + 1}"])
 
                 while True:
                     try:
@@ -143,8 +142,9 @@ def pipeline():
 
                         break
 
-                    except BadRequestError:
+                    except BadRequestError as e:
 
+                        logging.warning(f"{e}")
                         logging.warning(f"Template Image: {story}{image}")
                         logging.warning(f"Kid Image: kids/{_}")
                         logging.warning(f"Adult Image: adult/{user_images_1[j]}")
