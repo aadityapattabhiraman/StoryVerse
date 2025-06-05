@@ -1,4 +1,5 @@
 import os
+import logging
 import time
 import base64
 import json
@@ -75,7 +76,10 @@ def pipeline():
     situations = get_situation(f"{story}story.json")
     descriptions = get_descritions(f"{story}descriptions.json")
     user_images = get_images("../data/evaluation/kids/")
+    print(user_images)
     user_images_1 = get_images("../data/evaluation/adult/")
+    print(user_images_1)
+    exit()
 
     timestamps = []
 
@@ -131,9 +135,21 @@ def pipeline():
                             ],
                             prompt=prompt,
                         )
+
+                        logging.debug(f"Template Image: {story}{image}")
+                        logging.debug(f"Kid Image: kids/{_}")
+                        logging.debug(f"Adult Image: adult/{user_images_1[j]}")
+                        logging.debug(f"Prompt: {prompt}")
+
                         break
 
                     except BadRequestError:
+
+                        logging.warning(f"Template Image: {story}{image}")
+                        logging.warning(f"Kid Image: kids/{_}")
+                        logging.warning(f"Adult Image: adult/{user_images_1[j]}")
+                        logging.warning(f"Prompt: {prompt}")
+
                         continue
 
                 image_base64 = result.data[0].b64_json
@@ -163,4 +179,9 @@ def pipeline():
 if __name__ == "__main__":
 
     client = OpenAI(api_key=os.environ["OpenAI_Key"])
+    logging.basicConfig(
+        filename="logs.log",
+        encoding="utf-8",
+        filemode="a",
+    )
     pipeline()
