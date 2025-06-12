@@ -19,7 +19,7 @@ def get_images(directory: str) -> List[str]:
     return images
 
 
-def get_prompt(temp: str, kid: str, adult: str) -> str:
+def get_prompt(temp: str, kid: str, woman: str, man: str) -> str:
 
     prompt = f"""
     🎨 Scene & Emotion:
@@ -33,8 +33,11 @@ def get_prompt(temp: str, kid: str, adult: str) -> str:
     🔹 Child Character Description:
     {kid}
 
-    🔹 Adult Character Description:
-    {adult}
+    🔹 Woman Character Description:
+    {woman}
+
+    🔹 Man Character Description:
+    {man}
 
     ✦ Preserve exactly:
     – Facial expression, eye direction, and head tilt
@@ -72,109 +75,92 @@ def get_descritions(path: str) -> Dict:
 def pipeline():
 
     story = "../data/Maya and the Little Flower/"
-    final = "../data/11-06/multi/"
-    template_images = get_images(story)[4:6]
-    situations = get_situation(f"{story}story.json")
+    final = "../data/13-06/"
+    template_images = ["../data/3.png"]
     descriptions = get_descritions(f"{story}descriptions.json")[0]
     user_images = get_images("../data/evaluation/kids/")
     user_images_1 = get_images("../data/evaluation/adult/")
-    kid, adult = get_descritions("../data/evaluation/desc.json")
+    user_images_2 = get_images("../data/evaluation/men/")
+    kid, woman, man = get_descritions("../data/evaluation/desc.json")
 
     timestamps = []
 
-    for i in range(2):
+    j = 0
+    for image in template_images:
 
-        if i == 0:
-            situation = True
+        for _ in user_images:
 
-        else:
-            situation = False
+            start = time.time()
 
-        j = 0
-        for image in template_images:
+            if len(timestamps) < 5:
+                timestamps.append(datetime.now())
 
-            for _ in user_images:
-
-                start = time.time()
-
-                if len(timestamps) < 5:
-                    timestamps.append(datetime.now())
-
-                else:
-
-                    while True:
-
-                        if ((timestamps[0] + timedelta(minutes=1)) <
-                                datetime.now()):
-
-                            del timestamps[0]
-                            timestamps.append(datetime.now())
-                            break
-
-                        time.sleep(1)
-
-                if situation:
-                    temp = situations.get(image[:-4])
-                    prompt = get_prompt(temp, kid[f"{j + 1}"], adult[f"{j + 1}"])
-
-                else:
-                    temp = descriptions.get(image[:-4])
-                    prompt = get_prompt(temp, kid[f"{j + 1}"], adult[f"{j + 1}"])
+            else:
 
                 while True:
-                    try:
 
-                        result = client.images.edit(
-                            model="gpt-image-1",
-                            image=[
-                                open(f"{story}{image}", "rb"),
-                                open(f"../data/evaluation/kids/{_}", "rb"),
-                                open(f"../data/evaluation/adult/{user_images_1[j]}",
-                                     "rb")
-                            ],
-                            prompt=prompt,
-                        )
+                    if ((timestamps[0] + timedelta(minutes=1)) <
+                            datetime.now()):
 
-                        logging.debug(f"Template Image: {story}{image}")
-                        logging.debug(f"Kid Image: kids/{_}")
-                        logging.debug(f"Adult Image: adult/{user_images_1[j]}")
-                        logging.debug(f"Prompt: {prompt}")
-
+                        del timestamps[0]
+                        timestamps.append(datetime.now())
                         break
 
-                    except BadRequestError as e:
+                    time.sleep(1)
 
-                        print("Nope")
-                        logging.warning(f"{e}")
-                        logging.warning(f"Template Image: {story}{image}")
-                        logging.warning(f"Kid Image: kids/{_}")
-                        logging.warning(f"Adult Image: adult/{user_images_1[j]}")
-                        logging.warning(f"Prompt: {prompt}")
+            temp = descriptions.get(image[:-4])
+            prompt = get_prompt(temp, kid[f"{j + 1}"], woman[f"{j + 1}"], man[f"{j+1}"])
 
-                        continue
+            while True:
+                try:
 
-                image_base64 = result.data[0].b64_json
-                image_bytes = base64.b64decode(image_base64)
+                    result = client.images.edit(
+                        model="gpt-image-1",
+                        image=[
+                            open(f"{image}", "rb"),
+                            open(f"../data/evaluation/kids/{_}", "rb"),
+                            open(f"../data/evaluation/adult/{user_images_1[j]}",
+                                 "rb"),
+                            open(f"../data/evaluation/men/{user_images_2[j]}", "rb")
+                        ],
+                        prompt=prompt,
+                    )
 
-                end = time.time()
-                print(f"Time Taken: {end - start}")
+                    logging.debug(f"Template Image: {story}{image}")
+                    logging.debug(f"Kid Image: kids/{_}")
+                    logging.debug(f"Adult Image: adult/{user_images_1[j]}")
+                    logging.debug(f"Prompt: {prompt}")
 
-                if situation:
-                    with open(f"{final}{_[:-4]}_{end - start}.png", "wb") as f:
-                        f.write(image_bytes)
+                    break
 
-                else:
-                    with open(f"{final}{_[:-4]}_{end - start}_des.png", "wb"
-                              ) as f:
-                        f.write(image_bytes)
+                except BadRequestError as e:
 
-                print(f"{final}{_[:-4]}_{end - start}.png COMPLETED")
+                    print("Nope")
+                    logging.warning(f"{e}")
+                    logging.warning(f"Template Image: {story}{image}")
+                    logging.warning(f"Kid Image: kids/{_}")
+                    logging.warning(f"Adult Image: adult/{user_images_1[j]}")
+                    logging.warning(f"Prompt: {prompt}")
 
-                if j < 6:
-                    j += 1
+                    continue
 
-                else:
-                    j = 0
+            image_base64 = result.data[0].b64_json
+            image_bytes = base64.b64decode(image_base64)
+
+            end = time.time()
+            print(f"Time Taken: {end - start}")
+
+            with open(f"{final}{_[:-4]}_{end - start}_des.png", "wb"
+                      ) as f:
+                f.write(image_bytes)
+
+            print(f"{final}{_[:-4]}_{end - start}.png COMPLETED")
+
+            if j < 6:
+                j += 1
+
+            else:
+                j = 0
 
 
 if __name__ == "__main__":
