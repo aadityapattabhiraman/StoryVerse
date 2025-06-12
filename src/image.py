@@ -72,7 +72,7 @@ def get_descritions(path: str) -> Dict:
 def pipeline():
 
     story = "../data/Maya and the Little Flower/"
-    final = "../data/06-06/mult/"
+    final = "../data/11-06/multi/"
     template_images = get_images(story)[4:6]
     situations = get_situation(f"{story}story.json")
     descriptions = get_descritions(f"{story}descriptions.json")[0]
@@ -93,7 +93,7 @@ def pipeline():
         j = 0
         for image in template_images:
 
-            for _ in user_images[:1]:
+            for _ in user_images:
 
                 start = time.time()
 
@@ -144,6 +144,7 @@ def pipeline():
 
                     except BadRequestError as e:
 
+                        print("Nope")
                         logging.warning(f"{e}")
                         logging.warning(f"Template Image: {story}{image}")
                         logging.warning(f"Kid Image: kids/{_}")
